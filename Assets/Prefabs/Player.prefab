@@ -14,8 +14,7 @@ GameObject:
   - component: {fileID: 6879752756298236294}
   - component: {fileID: 5508197658351857642}
   - component: {fileID: 4255616498688245182}
-  - component: {fileID: 5497493851762786267}
-  - component: {fileID: 6796997601795716166}
+  - component: {fileID: 863582843862231290}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -207,8 +206,8 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6796997601795716166}
-        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+      - m_Target: {fileID: 863582843862231290}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
         m_MethodName: OnMove
         m_Mode: 0
         m_Arguments:
@@ -239,8 +238,8 @@ MonoBehaviour:
     m_ActionName: 'Player/Crouch[/Keyboard/c]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6796997601795716166}
-        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+      - m_Target: {fileID: 863582843862231290}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
         m_MethodName: OnJump
         m_Mode: 0
         m_Arguments:
@@ -310,7 +309,7 @@ MonoBehaviour:
   m_DefaultActionMap: 
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &5497493851762786267
+--- !u!114 &863582843862231290
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -323,26 +322,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  maxHealth: 100
-  currentHealth: 0
+  maxHealth: 3
   jumpForce: 12
+  groundCheck: {fileID: 4629092240878305002}
+  groundCheckRadius: 0.2
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  groundCheck: {fileID: 4629092240878305002}
-  groundCheckRadius: 0.2
---- !u!114 &6796997601795716166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3462516696737198626}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce2088192997902478345ef2955fe17d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6594431648801328808
 GameObject:
   m_ObjectHideFlags: 0

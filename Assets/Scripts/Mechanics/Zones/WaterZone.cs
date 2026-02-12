@@ -8,6 +8,6 @@ public class WaterZone : Zone
     protected override void ApplyZoneEffect(Player player)
     {
         // Change my player's speed modifier value
-        player.ApplySpeedModifier(speedModifier);
+        // player.ApplySpeedModifier(speedModifier);
     }
 }

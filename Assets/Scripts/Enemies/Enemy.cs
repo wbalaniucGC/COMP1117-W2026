@@ -1,52 +1,61 @@
 using UnityEngine;
 
-public class Enemy : Character
+public abstract class Enemy : Character
 {
-    [Header("Enemy Settings")]
-    [SerializeField] private float patrolDistance = 5.0f;
+    [Header("Enemy Interaction")]
+    [SerializeField] protected int contactDamage = 1;
+    [SerializeField] protected float stompBounceForce = 12f;
 
-    private Vector2 startPos;   // Starting position
-    private int direction = -1;  // Direction my enemy is facing
-
-    protected override void Awake()
+    // Shared behaviour: ALL enemies need to detect the player hitting them.
+    protected virtual void OnCollisionEnter2D(Collision2D collision)
     {
-        base.Awake();
+        // 1. Try to get the Player script
+        if(collision.gameObject.TryGetComponent(out Player player))
+        {
+            // 2. Check the collision normal (direction of the hit)
+            // A normal.y of -1 means the hitcame from the very top.
+            Vector2 contactNormal = collision.contacts[0].normal;
 
-        // Could remove this since we are not doing anything specific. But we are keeping it
-        // to make changes in the future.
-        startPos = transform.position;
+            if(contactNormal.y <= -0.5f)
+            {
+                // Successful "Bonk"
+                OnStomped(player);
+            }
+            else
+            {
+                // Hit from the side or bottom
+                player.TakeDamage(contactDamage);
+            }
+        }
     }
 
-    private void Update()
+    protected virtual void OnStomped(Player player)
     {
-        // Calculate the boundaries of my movement
-        float leftBoundary = startPos.x - patrolDistance;
-        float rightBoundary = startPos.x + patrolDistance;
-
-        // Move my Enemy
-        transform.Translate(Vector2.right * direction * MoveSpeed * Time.deltaTime);
-
-        // Flip the enemy when it hits a boundary
-        if (transform.position.x >= rightBoundary)
+        // Apply a "bounce" directly to the players rigidbody.
+        Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
+        if (playerRb != null)
         {
-            direction = -1;     // Go to the left
-            transform.localScale = new Vector3(1, 1, 1);
+            playerRb.linearVelocity = new Vector2(playerRb.linearVelocity.x, stompBounceForce);
         }
-        else if (transform.position.x <= leftBoundary)
-        {
-            direction = 1;      // Go to the right
-            transform.localScale = new Vector3(-1, 1, 1);
-        }
+
+        Die();
     }
 
     public override void Die()
     {
-        Debug.Log("Enemy is dead");
+        if(isDead) return;
 
-        // ENEMY DEATH LOGIC!
-        // ==================
-        // Award points / loot to the player
-        // Player death animation
-        // Destroy the enemy
+        isDead = true;
+
+        // 1. Play the "enemy-death" (explosion) animation
+        anim.SetTrigger("Death");
+
+        // 2. Disable the collider so the player doesn't hit the "corpse"
+        rBody.simulated = false;
+        rBody.linearVelocity = Vector2.zero;
+        GetComponent<Collider2D>().enabled = false;
+
+        // 3. Destroy the object
+        Destroy(gameObject, 0.5f);
     }
 }
