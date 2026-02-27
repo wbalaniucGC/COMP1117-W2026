@@ -169,7 +169,7 @@ Transform:
   m_GameObject: {fileID: 2038200562470862844}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -4.97, y: -0.48, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -303,6 +303,7 @@ MonoBehaviour:
   facesLeftByDefault: 1
   contactDamage: 1
   stompBounceForce: 12
+  deathEffectPrefab: {fileID: 1845894047494608977, guid: e40363ecfbfae4442b0828da7f060841, type: 3}
   pointA: {fileID: 7733454517706481595}
   pointB: {fileID: 568766472385610078}
   arrivalThreshold: 0.5
@@ -332,7 +333,7 @@ Transform:
   m_GameObject: {fileID: 5668697286318975417}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 7.59, y: -0.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

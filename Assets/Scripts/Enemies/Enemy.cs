@@ -6,6 +6,9 @@ public abstract class Enemy : Character
     [SerializeField] protected int contactDamage = 1;
     [SerializeField] protected float stompBounceForce = 12f;
 
+    [Header("Death Effects")]
+    [SerializeField] private GameObject deathEffectPrefab; 
+
     // Shared behaviour: ALL enemies need to detect the player hitting them.
     protected virtual void OnCollisionEnter2D(Collision2D collision)
     {
@@ -44,11 +47,19 @@ public abstract class Enemy : Character
     public override void Die()
     {
         if(isDead) return;
-
         isDead = true;
 
+        // 0. Spawn death effect prefab at the current enemy position
+        if (deathEffectPrefab != null)
+        {
+            Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+        }
+
         // 1. Play the "enemy-death" (explosion) animation
-        anim.SetTrigger("Death");
+        if(sRend != null)
+        {
+            sRend.enabled = false;
+        }
 
         // 2. Disable the collider so the player doesn't hit the "corpse"
         rBody.simulated = false;
@@ -56,6 +67,6 @@ public abstract class Enemy : Character
         GetComponent<Collider2D>().enabled = false;
 
         // 3. Destroy the object
-        Destroy(gameObject, 0.5f);
+        Destroy(gameObject, 0.1f);
     }
 }

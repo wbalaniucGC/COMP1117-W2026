@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,11 +13,16 @@ public class Player : Character
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
 
-    [Header("Combat Settings")]
-    [SerializeField] private float knockbackForce = 5f;
+    [Header("Combat & Health Settings")]
+    [SerializeField] private float knockbackForce = 7f;
+    [SerializeField] private float iframeDuration = 1.5f;
+    [SerializeField] private float flashInterval = 0.1f;
+    [SerializeField] private float hurtStunTime = 0.3f;
 
     private Vector2 moveInput;
     private bool isGrounded;
+    private bool isInvulnerable = false;
+    private bool isStunned = false;
 
     protected override void Awake() => base.Awake();
 
@@ -30,7 +36,7 @@ public class Player : Character
 
     private void FixedUpdate()
     {
-        if (isDead) return;
+        if (isDead || isStunned) return;
         Move();
     }
 
@@ -80,26 +86,79 @@ public class Player : Character
 
     public override void TakeDamage(int amount)
     {
-        base.TakeDamage(amount);
-        if(!isDead)
-        {
-            anim.SetTrigger("Hurt");
+        if (isDead || isInvulnerable) return;
 
-            // Small knockback
-            ApplyKnockback();
+        currentHealth -= amount;
+
+        if(currentHealth <= 0)
+        {
+            Die();            
         }
+        else
+        {
+            StartCoroutine(HandleHurtSequence());
+        }
+    }
+
+    private IEnumerator HandleHurtSequence()
+    {
+        isInvulnerable = true;
+        isStunned = true; // Lock input
+        anim.SetTrigger("Hurt");
+
+        ApplyKnockback();
+
+        // Wait for the stun to end before allowwing movement
+        yield return new WaitForSeconds(hurtStunTime);
+        isStunned = false;
+
+        // iFrame Flashing Effect
+        float timer = 0;
+        while (timer < iframeDuration)
+        {
+            sRend.enabled = !sRend.enabled; // Flicker the sprite
+            yield return new WaitForSeconds(flashInterval);
+            timer += flashInterval;
+        }
+
+        sRend.enabled = true;
+        isInvulnerable = false;
     }
 
     public override void Die()
     {
         if (isDead) return;
         isDead = true;
+        isStunned = false;
 
-        anim.SetTrigger("Death");
+        if(sRend != null)
+        {
+            sRend.sortingLayerName = "Foreground";
+            sRend.sortingOrder = 100;
+        }
+
+        anim.SetBool("IsDead", true);
+        StopAllCoroutines();
+        StartCoroutine(MarioDeathSequence());
+    }
+
+    private IEnumerator MarioDeathSequence()
+    {
+        // Phase 1: Freeze and Pose
+        anim.SetTrigger("Hurt");
         rBody.linearVelocity = Vector2.zero;
-        rBody.simulated = false;
+        rBody.simulated = false; // Ignore physics temporarily
 
-        moveInput = Vector2.zero;
+        yield return new WaitForSeconds(0.5f); // The "Oh no" moment
+
+        // Phase 2: The Death Leap
+        GetComponent<Collider2D>().enabled = false; // Fall through floors
+        rBody.simulated = true;
+        rBody.gravityScale = 3f; // Fast fall
+        rBody.linearVelocity = new Vector2(0, 10f); // Upward pop
+
+        yield return new WaitForSeconds(3f);
+        Destroy(gameObject);
     }
 
     private void ApplyKnockback()

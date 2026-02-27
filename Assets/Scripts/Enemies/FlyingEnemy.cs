@@ -48,4 +48,17 @@ public abstract class FlyingEnemy : Enemy
     {
         currentTarget = (currentTarget == pointA) ? pointB : pointA;
     }
+
+    private void OnDrawGizmos()
+    {
+        if(pointA != null && pointB != null)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(pointA.position, pointB.position);
+
+            // Arrival zones
+            Gizmos.DrawWireSphere(pointA.position, arrivalThreshold);
+            Gizmos.DrawWireSphere(pointB.position, arrivalThreshold);
+        }
+    }
 }
