@@ -2,8 +2,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(Animator))]
-public abstract class Character : MonoBehaviour
+public abstract class Character : MonoBehaviour, IDamageable
 {
     // Private variables
     [Header("Base Stats")]
@@ -25,15 +24,14 @@ public abstract class Character : MonoBehaviour
 
     // Public Properties (Read-only)
     public float MoveSpeed => moveSpeed;
-    public bool IsDead => isDead;
     
 
     protected virtual void Awake()
     {
         rBody = GetComponent<Rigidbody2D>();
-        anim = GetComponent<Animator>();
 
-        // Find reference even if it's on a child object
+        // Logic stays on root, but these components are now children
+        anim = GetComponentInChildren<Animator>();
         sRend = GetComponentInChildren<SpriteRenderer>();
 
         currentHealth = maxHealth;
@@ -52,7 +50,7 @@ public abstract class Character : MonoBehaviour
         if (Mathf.Abs(horizontalVelocity) > 0.1f)
         {
             float direction = horizontalVelocity > 0 ? 1f : -1f;
-            Vector3 newScale = transform.localScale;
+            Vector3 newScale = anim.transform.localScale;
 
             if (facesLeftByDefault)
             {
@@ -65,7 +63,7 @@ public abstract class Character : MonoBehaviour
                 newScale.x = direction;
             }
 
-            transform.localScale = newScale;
+            anim.transform.localScale = newScale;
         }
     }
 

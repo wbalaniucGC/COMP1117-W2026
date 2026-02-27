@@ -8,8 +8,12 @@ public class Player : Character
 
     [Header("Detection Settings")]
     [SerializeField] private Transform groundCheck;
+    [SerializeField] private Transform wallCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
+
+    [Header("Combat Settings")]
+    [SerializeField] private float knockbackForce = 5f;
 
     private Vector2 moveInput;
     private bool isGrounded;
@@ -74,6 +78,18 @@ public class Player : Character
         anim.SetBool("IsGrounded", isGrounded);
     }
 
+    public override void TakeDamage(int amount)
+    {
+        base.TakeDamage(amount);
+        if(!isDead)
+        {
+            anim.SetTrigger("Hurt");
+
+            // Small knockback
+            ApplyKnockback();
+        }
+    }
+
     public override void Die()
     {
         if (isDead) return;
@@ -84,5 +100,16 @@ public class Player : Character
         rBody.simulated = false;
 
         moveInput = Vector2.zero;
+    }
+
+    private void ApplyKnockback()
+    {
+        // Determine direction: push away from where the player is currently facing
+
+        float pushDirection = transform.localScale.x > 0 ? -1f : 1f;
+
+        // Reset velocity first so the knockback is consistent
+        rBody.linearVelocity = Vector2.zero;
+        rBody.AddForce(new Vector2(pushDirection * knockbackForce, knockbackForce), ForceMode2D.Impulse);
     }
 }
