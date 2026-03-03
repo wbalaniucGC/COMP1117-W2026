@@ -6,6 +6,7 @@ public class Player : Character
 {
     [Header("Movement Settings")]
     [SerializeField] private float jumpForce = 12f;
+    [SerializeField] private int maxJumps = 2;  // Totals jumps allowed.
 
     [Header("Detection Settings")]
     [SerializeField] private Transform groundCheck;
@@ -19,12 +20,20 @@ public class Player : Character
     [SerializeField] private float flashInterval = 0.1f;
     [SerializeField] private float hurtStunTime = 0.3f;
 
+    [Header("UI References")]
+    [SerializeField] private GameOverUI gameOverUI;
+
     private Vector2 moveInput;
     private bool isGrounded;
+    private int jumpsRemaining;
     private bool isInvulnerable = false;
     private bool isStunned = false;
 
-    protected override void Awake() => base.Awake();
+    protected override void Awake()
+    {
+        base.Awake();
+        jumpsRemaining = maxJumps;
+    }
 
     private void Update()
     {
@@ -51,10 +60,12 @@ public class Player : Character
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        // context.started is equivalent to "GetButtonDown"
-        if (context.started && isGrounded && !isDead)
+        if(context.started && !isDead && !isStunned)
         {
-            Jump();
+            if(isGrounded || jumpsRemaining > 0)
+            {
+                Jump();
+            }
         }
     }
 
@@ -70,11 +81,27 @@ public class Player : Character
     {
         rBody.linearVelocity = new Vector2(rBody.linearVelocity.x, jumpForce);
         anim.SetTrigger("Jump");
+
+        jumpsRemaining--;
     }
 
     private void CheckEnvironment()
     {
+        bool wasGrounded = isGrounded;
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+
+        // Reset jumps when the player lands
+        if(isGrounded && !wasGrounded)
+        {
+            jumpsRemaining = maxJumps;
+        }
+
+        // Safety: if the player walks off a lege without jumping.
+        // they should only have 1 jump left
+        if(!isGrounded && wasGrounded && jumpsRemaining == maxJumps)
+        {
+            jumpsRemaining--;
+        }
     }
 
     private void UpdateAnimations()
@@ -157,7 +184,14 @@ public class Player : Character
         rBody.gravityScale = 3f; // Fast fall
         rBody.linearVelocity = new Vector2(0, 10f); // Upward pop
 
+        // Wait for the play to fall out of view
         yield return new WaitForSeconds(3f);
+
+        if(gameOverUI != null)
+        {
+            gameOverUI.ShowGameOver();
+        }
+
         Destroy(gameObject);
     }
 
