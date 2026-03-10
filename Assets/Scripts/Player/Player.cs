@@ -185,14 +185,15 @@ public class Player : Character
         rBody.linearVelocity = new Vector2(0, 10f); // Upward pop
 
         // Wait for the play to fall out of view
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(1f);
 
         if(gameOverUI != null)
         {
             gameOverUI.ShowGameOver();
         }
 
-        Destroy(gameObject);
+        // Destroy(gameObject);
+        gameObject.SetActive(false);    // Instead of destroying and instantiating the player, we will deactivate, move and reactivate.
     }
 
     private void ApplyKnockback()
@@ -204,5 +205,14 @@ public class Player : Character
         // Reset velocity first so the knockback is consistent
         rBody.linearVelocity = Vector2.zero;
         rBody.AddForce(new Vector2(pushDirection * knockbackForce, knockbackForce), ForceMode2D.Impulse);
+    }
+
+    public void ResetState()
+    {
+        isDead = false;
+        isStunned = false;
+        currentHealth = 3;
+        anim.SetBool("IsDead", false);
+        sRend.enabled = true;
     }
 }

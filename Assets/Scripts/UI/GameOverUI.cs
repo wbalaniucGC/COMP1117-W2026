@@ -9,6 +9,10 @@ public class GameOverUI : MonoBehaviour
     [SerializeField] private Image fader;
     [SerializeField] private GameObject menuPanel;
 
+    [Header("Checkpoint References")]
+    [SerializeField] private SaveManager saveManager;
+    [SerializeField] private GameObject player;
+
     [Header("Settings")]
     [SerializeField] private float fadeDuration = 1.0f;
 
@@ -17,6 +21,56 @@ public class GameOverUI : MonoBehaviour
         // Disable menu panel. Set fader to be transparent.
         menuPanel.SetActive(false);
         fader.color = new Color(0, 0, 0, 0);
+    }
+
+    public void LoadFromCheckpoint()
+    {
+        // 0. Read the data from the persistentDataPath
+        PlayerSaveData data = saveManager.LoadGame();
+
+        // Safety check!
+        if(data != null)
+        {
+            // 1. Reactivate the player object
+            player.SetActive(true);
+
+            // 2. Reconstruct the vector3 from the saved float array.
+            Vector3 savedPos = new Vector3(data.position[0], data.position[1], data.position[2]);
+
+            // 3. Teleport the player back to the checkpoint. Reset
+            player.transform.position = savedPos;
+
+            Player playerScript = player.GetComponent<Player>();
+            if(playerScript != null)
+            {
+                playerScript.ResetState();
+            }
+
+            // 4. Reset velocity so they don't spawn with old physics
+            Rigidbody2D rBody = player.GetComponent<Rigidbody2D>();
+            if(rBody != null)
+            {
+                rBody.linearVelocity = Vector2.zero;
+                rBody.gravityScale = 5f;
+                rBody.simulated = true;
+            }
+
+            Collider2D col = player.GetComponent<Collider2D>();
+            if(col != null)
+            {
+                col.enabled = true;
+            }
+
+            // 5. Hide the game over menu and reset values
+            menuPanel.SetActive(false);
+            fader.color = new Color(0, 0, 0, 0);
+
+            Debug.Log("Spawned at Checkpoint");
+        }
+        else
+        {
+            Debug.LogError("No checkpoint file found!");
+        }
     }
 
     public void ShowGameOver()
